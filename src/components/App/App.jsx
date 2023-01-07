@@ -1,6 +1,7 @@
-import { useState } from 'react';
 import { nanoid } from 'nanoid';
-import useLocalStorage from 'hooks/useLocalStorage';
+import { useSelector, useDispatch } from 'react-redux';
+import { getContacts, getFilter } from 'redux/selectors';
+import { addContacts, setFilter, removeContacts } from 'redux/slice';
 import Form from '../Form';
 import ContactList from '../ContactList';
 import Filter from '../Filter';
@@ -9,24 +10,26 @@ import GlobalStyle from '../GlobalStyle';
 import Title from './App.styled';
 
 const App = () => {
-  const [contacts, setContacts] = useLocalStorage('contacts', []);
-  const [filter, setFilter] = useState('');
+  const contacts = useSelector(getContacts);
+  const filter = useSelector(getFilter);
+  const dispatch = useDispatch();
 
   const addContact = ({ name, number }) => {
-    const newContact = {
-      id: nanoid(),
-      name,
-      number,
-    };
-    setContacts(prevContacts => [newContact, ...prevContacts ])
+    dispatch(
+      addContacts({
+        id: nanoid(),
+        name: name,
+        number: number,
+      })
+    );
   };
 
   const deleteContact = contactId => {
-    setContacts(contacts.filter(contact => contact.id !== contactId));
+    dispatch(removeContacts(contactId));
   };
 
   const changeFilter = e => {
-    setFilter(e.currentTarget.value);
+    dispatch(setFilter(e.target.value));
   };
 
   const getFilteredContact = () => {

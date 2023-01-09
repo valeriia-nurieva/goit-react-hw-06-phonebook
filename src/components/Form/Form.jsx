@@ -1,10 +1,17 @@
 import { useState } from 'react';
-import PropTypes from 'prop-types';
+import { useSelector, useDispatch } from 'react-redux';
+import toast, { Toaster } from 'react-hot-toast';
+import { nanoid } from 'nanoid';
+import { getContacts } from 'redux/selectors';
+import { addContacts } from 'redux/contactsSlice';
 import { FormStyled, FormLabel, FormInput, Button } from './Form.styled';
 
-const Form = ({ contacts, onSubmit }) => {
+const Form = () => {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
+
+  const contacts = useSelector(getContacts);
+  const dispatch = useDispatch();
 
   const handleChange = e => {
     const { name, value } = e.target;
@@ -21,9 +28,15 @@ const Form = ({ contacts, onSubmit }) => {
   const handleSubmit = e => {
     e.preventDefault();
     if (contacts.find(contact => contact.name === name)) {
-      return alert(`${name} is is already in contacts.`);
+      return toast.error(`${name} is already in contacts.`);
     } else {
-      onSubmit({ name, number });
+      dispatch(
+        addContacts({
+          id: nanoid(),
+          name: name,
+          number: number,
+        })
+      );
       reset();
     }
   };
@@ -60,19 +73,9 @@ const Form = ({ contacts, onSubmit }) => {
         />
       </FormLabel>
       <Button type="submit">Add contact</Button>
+      <Toaster />
     </FormStyled>
   );
-};
-
-Form.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
-  contacts: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string,
-      name: PropTypes.string,
-      number: PropTypes.string,
-    })
-  ).isRequired,
 };
 
 export default Form;
